@@ -166,8 +166,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a56575a3c9537542bf3ccc968f952db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rows: 5
-  columns: 5
+  rows: 6
+  cols: 7
+  board: {fileID: 1590304789}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -204,7 +205,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.19062775, g: 0.11044855, b: 0.3207547, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -326,7 +327,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 626670953}
-  - component: {fileID: 626670952}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -334,22 +334,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &626670952
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 626670951}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2504e5755f28f9942a6505fdaf3a6711, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  cellPrefab: {fileID: 1615407892978477485, guid: 41c67c24f936deb409df1bbc2641b893, type: 3}
-  gridParent: {fileID: 1590304786}
-  columnButtonPrefab: {fileID: 0}
-  columnButtonParent: {fileID: 0}
 --- !u!4 &626670953
 Transform:
   m_ObjectHideFlags: 0
@@ -475,6 +459,7 @@ GameObject:
   - component: {fileID: 1590304786}
   - component: {fileID: 1590304787}
   - component: {fileID: 1590304788}
+  - component: {fileID: 1590304789}
   m_Layer: 5
   m_Name: BoardPanel
   m_TagString: Untagged
@@ -522,9 +507,9 @@ MonoBehaviour:
   m_StartCorner: 0
   m_StartAxis: 0
   m_CellSize: {x: 300, y: 300}
-  m_Spacing: {x: 20, y: 20}
+  m_Spacing: {x: 0, y: 0}
   m_Constraint: 1
-  m_ConstraintCount: 1
+  m_ConstraintCount: 6
 --- !u!114 &1590304788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -539,3 +524,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 2
   m_VerticalFit: 2
+--- !u!114 &1590304789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1590304785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 807e1a98261222741ba7036417a8b33f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cellPrefab: {fileID: 1615407892978477485, guid: 41c67c24f936deb409df1bbc2641b893, type: 3}
+  boardParent: {fileID: 1590304786}

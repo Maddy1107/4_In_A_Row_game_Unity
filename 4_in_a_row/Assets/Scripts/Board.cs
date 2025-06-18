@@ -1,66 +1,67 @@
-// Core game board logic and win condition checking
-public class Board
+using UnityEngine;
+using UnityEngine.UI;
+
+public class Board : MonoBehaviour
 {
-    private int[,] board;
-    public int Rows { get; private set; }
-    public int Columns { get; private set; }
+    public GameObject cellPrefab;
+    public Transform boardParent;
+    private int rows, cols;
 
-    public Board(int rows, int cols)
+    public int[,] cellStateGrid { get; private set; }
+    private Cell[,] cells;
+
+
+    public void GenerateBoard(int rows, int cols)
     {
-        Rows = rows;
-        Columns = cols;
-        board = new int[rows, cols];
-    }
+        // Clear previous board
+        foreach (Transform child in boardParent)
+            Destroy(child.gameObject);
 
-    public bool CanPlaceInColumn(int col) => board[0, col] == 0;
+        this.rows = rows;
+        this.cols = cols;
+        cellStateGrid = new int[rows, cols];
+        cells = new Cell[rows, cols];
 
-    public bool PlacePiece(int col, int playerId, out int row)
-    {
-        for (int r = Rows - 1; r >= 0; r--)
+        var layout = boardParent.GetComponent<GridLayoutGroup>();
+        var parentRect = boardParent.GetComponent<RectTransform>();
+
+        float cellSize = Mathf.Min(parentRect.rect.width / cols, parentRect.rect.height / rows);
+
+        layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        layout.constraintCount = cols;
+        layout.cellSize = new Vector2(cellSize, cellSize);
+
+        for (int r = 0; r < rows; r++)
         {
-            if (board[r, col] == 0)
+            for (int c = 0; c < cols; c++)
             {
-                board[r, col] = playerId;
-                row = r;
-                return true;
+                var newCell = Instantiate(cellPrefab, boardParent);
+                var cell = newCell.GetComponent<Cell>();
+                cell.Init(r, c);
+                cells[r, c] = cell;
             }
         }
-        row = -1;
-        return false;
     }
 
-    public bool CheckWin(int row, int col, int playerId)
+    public Vector2Int? PlacePiece(int col, int playerId)
     {
-        return CountDirection(row, col, 0, 1, playerId) + CountDirection(row, col, 0, -1, playerId) > 2 ||
-               CountDirection(row, col, 1, 0, playerId) + CountDirection(row, col, -1, 0, playerId) > 2 ||
-               CountDirection(row, col, 1, 1, playerId) + CountDirection(row, col, -1, -1, playerId) > 2 ||
-               CountDirection(row, col, 1, -1, playerId) + CountDirection(row, col, -1, 1, playerId) > 2;
-    }
-
-    private int CountDirection(int row, int col, int dRow, int dCol, int playerId)
-    {
-        int count = 0;
-        int r = row + dRow;
-        int c = col + dCol;
-
-        while (r >= 0 && r < Rows && c >= 0 && c < Columns && board[r, c] == playerId)
+        for (int row = rows - 1; row >= 0; row--)
         {
-            count++;
-            r += dRow;
-            c += dCol;
+            if (cellStateGrid[row, col] == 0)
+            {
+                cellStateGrid[row, col] = playerId;
+                cells[row, col].SetPiece(playerId);
+                return new Vector2Int(row, col);
+            }
         }
-
-        return count;
+        return null;
     }
 
     public bool IsFull()
     {
-        for (int c = 0; c < Columns; c++)
-            if (board[0, c] == 0)
+        for (int col = 0; col < cols; col++)
+            if (cellStateGrid[0, col] == 0)
                 return false;
-
         return true;
     }
-
-    public int[,] GetBoardCopy() => (int[,])board.Clone();
 }

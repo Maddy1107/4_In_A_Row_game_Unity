@@ -21,7 +21,7 @@ public class UIManager : MonoBehaviour
     }
 
     public GameObject cellPrefab;
-    public RectTransform gridParent;
+    public RectTransform boardParent;
     public GameObject columnButtonPrefab;
     public Transform columnButtonParent;
 
@@ -31,13 +31,13 @@ public class UIManager : MonoBehaviour
     public void GenerateGrid(int rows, int cols)
     {
         // Clear existing cells
-        foreach (Transform child in gridParent)
+        foreach (Transform child in boardParent)
             Destroy(child.gameObject);
 
         gridCells = new GameObject[rows, cols];
 
-        GridLayoutGroup layout = gridParent.GetComponent<GridLayoutGroup>();
-        RectTransform parentRect = gridParent.GetComponent<RectTransform>();
+        GridLayoutGroup layout = boardParent.GetComponent<GridLayoutGroup>();
+        RectTransform parentRect = boardParent.GetComponent<RectTransform>();
 
         float parentWidth = parentRect.rect.width;
         float parentHeight = parentRect.rect.height;
@@ -53,7 +53,7 @@ public class UIManager : MonoBehaviour
         {
             for (int c = 0; c < cols; c++)
             {
-                GameObject cell = Instantiate(cellPrefab, gridParent);
+                GameObject cell = Instantiate(cellPrefab, boardParent);
                 gridCells[r, c] = cell;
             }
         }

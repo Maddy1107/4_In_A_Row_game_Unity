@@ -11,9 +11,6 @@ public class GameManager : MonoBehaviour
     public Board board;
 
     [Header("Player Settings")]
-    public PlayerType player1Type = PlayerType.Human;
-    public PlayerType player2Type = PlayerType.AI;
-
     private IPlayerController player1;
     private IPlayerController player2;
     private IPlayerController currentPlayer;
@@ -36,23 +33,27 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Start()
+    private void StartGame()
     {
         board.GenerateBoard(rows, cols);
         resultChecker = new GameResult(board.CellStateGrid);
 
-        player1 = PlayerFactory.CreatePlayer(player1Type, 1);
-        player2 = PlayerFactory.CreatePlayer(player2Type, 2);
-
         currentPlayer = player1;
-        currentPlayer.PlayTurn(); // Let first player (AI/human) start
+        currentPlayer.PlayTurn();
+    }
+
+    public void CreatePlayer(PlayerType p1Type, PlayerType p2Type)
+    {
+        player1 = PlayerFactory.CreatePlayer(p1Type, 1);
+        player2 = PlayerFactory.CreatePlayer(p2Type, 2);
+        StartGame();
     }
 
     public void OnCellClicked(int col)
     {
         if (currentPlayer is IHumanInputReceiver human)
         {
-            human.SetColumn(col); // Human decides input
+            human.SetColumn(col);
         }
         else
         {
@@ -85,14 +86,14 @@ public class GameManager : MonoBehaviour
 
         if (result == Result.Win)
         {
-            Debug.Log($"🎉 Player {currentPlayer.PlayerId} Wins!");
+            Debug.Log($"Player {currentPlayer.PlayerId} Wins!");
             OnWin?.Invoke(currentPlayer.PlayerId);
             return;
         }
 
         if (board.IsFull())
         {
-            Debug.Log("🤝 It's a Draw!");
+            Debug.Log("It's a Draw!");
             OnDraw?.Invoke();
             return;
         }
@@ -103,7 +104,7 @@ public class GameManager : MonoBehaviour
     private void ChangeTurn()
     {
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
-        Debug.Log($"🔄 Switched to Player {currentPlayer.PlayerId}");
-        currentPlayer.PlayTurn(); // Let AI or wait for human
+        Debug.Log($"Switched to Player {currentPlayer.PlayerId}");
+        currentPlayer.PlayTurn();
     }
 }

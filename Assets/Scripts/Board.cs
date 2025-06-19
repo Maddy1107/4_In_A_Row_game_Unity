@@ -66,11 +66,24 @@ public class Board : MonoBehaviour
 
     public bool IsFull()
     {
+        if (CellStateGrid == null || cols == 0 || rows == 0)
+            return false;
+
         for (int col = 0; col < cols; col++)
         {
-            if (CellStateGrid[0, col] == 0)
+            if (GetCellState(0, col) == 0)
                 return false;
         }
         return true;
+    }
+
+    public int GetCellState(int row, int col)
+    {
+        if (row < 0 || row >= rows || col < 0 || col >= cols)
+        {
+            Debug.LogError($"Invalid cell coordinates: ({row}, {col})");
+            return -1;
+        }
+        return CellStateGrid[row, col];
     }
 }

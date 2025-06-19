@@ -1,5 +1,5 @@
-using System;
 using UnityEngine;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,8 +8,23 @@ public class GameManager : MonoBehaviour
     [Header("Board Settings")]
     public int rows = 6;
     public int cols = 7;
-
     public Board board;
+
+    [Header("Player Settings")]
+    public PlayerType player1Type = PlayerType.Human;
+    public PlayerType player2Type = PlayerType.AI;
+
+    private IPlayerController player1;
+    private IPlayerController player2;
+    private IPlayerController currentPlayer;
+
+    public IPlayerController CurrentPlayer => currentPlayer;
+
+    private GameResult resultChecker;
+
+    // Game Events
+    public event Action<int> OnWin;
+    public event Action OnDraw;
 
     private void Awake()
     {
@@ -21,45 +36,74 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
-    void Start()
+    private void Start()
     {
         board.GenerateBoard(rows, cols);
+        resultChecker = new GameResult(board.CellStateGrid);
+
+        player1 = PlayerFactory.CreatePlayer(player1Type, 1);
+        player2 = PlayerFactory.CreatePlayer(player2Type, 2);
+
+        currentPlayer = player1;
+        currentPlayer.PlayTurn(); // Let first player (AI/human) start
     }
 
     public void OnCellClicked(int col)
     {
-        //if (!currentPlayer.IsHuman) return;
-        TryMakeMove(col);
+        if (currentPlayer is IHumanInputReceiver human)
+        {
+            human.SetColumn(col); // Human decides input
+        }
+        else
+        {
+            Debug.LogWarning("Current player is AI. Ignoring click.");
+        }
     }
 
     public void OnCellHover(int col, bool isHovering)
     {
-        var cell = board.GetPlaceableCell(col);
-        if (cell == null) return;
+        if (currentPlayer is IHumanInputReceiver)
+        {
+            var cell = board.GetPlaceableCell(col);
+            if (cell == null) return;
 
-        if (isHovering) cell.SetHighLightPiece(1);
-        else cell.ResetCell();
+            if (isHovering)
+                cell.SetHighLightPiece(currentPlayer.PlayerId);
+            else
+                cell.ResetCell();
+        }
     }
 
-    private void TryMakeMove(int col)
+    public void TryMakeMove(int col)
     {
         var cell = board.GetPlaceableCell(col);
         if (cell == null) return;
 
-        board.PlacePiece(cell.row, col, 1);
+        board.PlacePiece(cell.row, col, currentPlayer.PlayerId);
 
-        // if (board.CheckWin(cell.row, col, currentPlayerId))
-        // {
-        //     Debug.Log($"Player {currentPlayerId} Wins!");
-        //     return;
-        // }
+        var result = resultChecker.CheckResult(cell.row, col, currentPlayer.PlayerId);
 
-        // if (board.IsFull())
-        // {
-        //     Debug.Log("Draw!");
-        //     return;
-        // }
+        if (result == Result.Win)
+        {
+            Debug.Log($"🎉 Player {currentPlayer.PlayerId} Wins!");
+            OnWin?.Invoke(currentPlayer.PlayerId);
+            return;
+        }
 
-        // currentPlayerId = 3 - currentPlayerId; // Fast toggle between 1 and 2
+        if (board.IsFull())
+        {
+            Debug.Log("🤝 It's a Draw!");
+            OnDraw?.Invoke();
+            return;
+        }
+
+        ChangeTurn();
+    }
+
+    private void ChangeTurn()
+    {
+        currentPlayer = (currentPlayer == player1) ? player2 : player1;
+        Debug.Log($"🔄 Switched to Player {currentPlayer.PlayerId}");
+        currentPlayer.PlayTurn(); // Let AI or wait for human
     }
 }

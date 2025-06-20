@@ -4,22 +4,69 @@ using UnityEngine.UI;
 public class SettingsMenu : MonoBehaviour
 {
     public Slider volumeSlider;
-    public Toggle musicToggle;
+    public Toggle volumeButton;
+    public Toggle sfxToggle;
+    public Button backButton;
+    [Header("Icons")]
+    public Sprite volumeOnIcon;
+    public Sprite volumeOffIcon;
+    public Sprite sfxOnIcon;
+    public Sprite sfxOffIcon;
+
+    private AudioSettings audioSettings = new AudioSettings();
 
     void OnEnable()
     {
-        volumeSlider.onValueChanged.AddListener(AudioManager.Instance.SetMusicVolume);
-        musicToggle.onValueChanged.AddListener(AudioManager.Instance.SetMusicEnabled);
+        audioSettings.Load();
+        volumeSlider.value = audioSettings.CurrentVolume;
+        sfxToggle.isOn = audioSettings.SFXEnabled;
+        volumeButton.isOn = !audioSettings.MusicEnabled;
+
+        volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
+        volumeButton.onValueChanged.AddListener(ToggleMute);
+        sfxToggle.onValueChanged.AddListener(ToggleSFX);
+        backButton.onClick.AddListener(() => UIManager.Instance.ShowUI(UIState.MainMenu));
+
+        UpdateIcons();
     }
+
     void OnDisable()
     {
-        volumeSlider.onValueChanged.RemoveListener(AudioManager.Instance.SetMusicVolume);
-        musicToggle.onValueChanged.RemoveListener(AudioManager.Instance.SetMusicEnabled);
+        audioSettings.Save();
+        volumeSlider.onValueChanged.RemoveListener(OnVolumeChanged);
+        volumeButton.onValueChanged.RemoveListener(ToggleMute);
+        sfxToggle.onValueChanged.RemoveListener(ToggleSFX);
+        backButton.onClick.RemoveAllListeners();
     }
 
     void Start()
     {
-        volumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 1f);
-        musicToggle.isOn = PlayerPrefs.GetInt("MusicEnabled", 1) == 1;
+        sfxToggle.isOn = audioSettings.SFXEnabled;
+        volumeButton.isOn = !audioSettings.MusicEnabled;
+    }
+
+    void OnVolumeChanged(float value)
+    {
+        audioSettings.SetVolume(value);
+        UpdateIcons();
+    }
+
+    void ToggleSFX(bool isOn)
+    {
+        audioSettings.ToggleSFX(isOn);
+        UpdateIcons();
+    }
+
+    void ToggleMute(bool isOn)
+    {
+        audioSettings.ToggleMute(isOn);
+        volumeSlider.value = audioSettings.CurrentVolume;
+        UpdateIcons();
+    }
+
+    void UpdateIcons()
+    {
+        volumeButton.GetComponent<Image>().sprite = audioSettings.MusicEnabled ? volumeOnIcon : volumeOffIcon;
+        sfxToggle.GetComponent<Image>().sprite = audioSettings.SFXEnabled ? sfxOnIcon : sfxOffIcon;
     }
 }

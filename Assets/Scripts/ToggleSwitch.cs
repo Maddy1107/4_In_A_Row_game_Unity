@@ -3,7 +3,8 @@ using UnityEngine.UI;
 
 public class ToggleSwitch : MonoBehaviour
 {
-    public RectTransform knob;
+    public Button knob;
+    private RectTransform knobRectTransform;
     public Vector2 onPosition;
     public Vector2 offPosition;
     public float lerpSpeed = 10f;
@@ -13,20 +14,25 @@ public class ToggleSwitch : MonoBehaviour
 
     void OnEnable()
     {
+        knobRectTransform = knob.GetComponent<RectTransform>();
         isOn = PlayerPrefs.GetString("ToggleSwitchState", "Easy") == "Hard";
-        knob.anchoredPosition = isOn ? onPosition : offPosition;
+        knobRectTransform.anchoredPosition = isOn ? onPosition : offPosition;
 
-        targetPosition = knob.anchoredPosition;
+        targetPosition = knobRectTransform.anchoredPosition;
 
+        knob.onClick.AddListener(Toggle);
+    }
+    void OnDisable()
+    {
         if (knob.TryGetComponent(out Button button))
         {
-            button.onClick.AddListener(Toggle);
+            button.onClick.RemoveListener(Toggle);
         }
     }
 
     void Update()
     {
-        knob.anchoredPosition = Vector2.Lerp(knob.anchoredPosition, targetPosition, Time.deltaTime * lerpSpeed);
+        knobRectTransform.anchoredPosition = Vector2.Lerp(knobRectTransform.anchoredPosition, targetPosition, Time.deltaTime * lerpSpeed);
     }
 
     public void Toggle()

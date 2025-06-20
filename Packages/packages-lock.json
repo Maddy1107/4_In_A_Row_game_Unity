@@ -1,14 +1,5 @@
 {
   "dependencies": {
-    "com.coplaydev.coplay": {
-      "version": "https://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@github.com/CoplayDev/unity-plugin.git#beta",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.inputsystem": "1.1.1"
-      },
-      "hash": "726d7abd7cd65b404ac15b9f4db73964fda1e4d1"
-    },
     "com.unity.2d.sprite": {
       "version": "1.0.0",
       "depth": 0,
@@ -78,15 +69,6 @@
       "depth": 0,
       "source": "registry",
       "dependencies": {},
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.inputsystem": {
-      "version": "1.1.1",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.modules.uielements": "1.0.0"
-      },
       "url": "https://packages.unity.com"
     },
     "com.unity.nuget.newtonsoft-json": {

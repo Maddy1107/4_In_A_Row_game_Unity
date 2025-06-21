@@ -32,6 +32,10 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
     }
+    void Start()
+    {
+        CreatePlayer(PlayerType.Human, PlayerType.Human);
+    }
 
     private void StartGame()
     {

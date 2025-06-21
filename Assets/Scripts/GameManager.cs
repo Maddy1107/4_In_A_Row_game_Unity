@@ -1,9 +1,13 @@
 using UnityEngine;
 using System;
+using TMPro;
+using System.Collections.Generic;
+using System.Linq;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    public static GameManager Instance;
 
     [Header("Board Settings")]
     public int rows = 6;
@@ -19,11 +23,12 @@ public class GameManager : MonoBehaviour
 
     private GameResult resultChecker;
 
-    // Game Events
-    public event Action<int> OnWin;
-    public event Action OnDraw;
+    public TMP_Text turnText;
 
-    private void Awake()
+    // Game Events
+    public event Action<IPlayerController, Result> OnGameOver;
+
+    void Awake()
     {
         if (Instance != null)
         {
@@ -43,7 +48,25 @@ public class GameManager : MonoBehaviour
         resultChecker = new GameResult(board.CellStateGrid);
 
         currentPlayer = player1;
+        ChangeTurnText();
+
         currentPlayer.PlayTurn();
+    }
+
+    public void SelectMode(GameMode mode)
+    {
+        switch (mode)
+        {
+            case GameMode.Local:
+                CreatePlayer(PlayerType.Human, PlayerType.Human);
+                break;
+            case GameMode.AI:
+                CreatePlayer(PlayerType.Human, PlayerType.AI);
+                break;
+            default:
+                Debug.LogError("Unsupported game mode selected.");
+                return;
+        }
     }
 
     public void CreatePlayer(PlayerType p1Type, PlayerType p2Type)
@@ -86,29 +109,61 @@ public class GameManager : MonoBehaviour
 
         board.PlacePiece(cell.row, col, currentPlayer.PlayerId);
 
-        var result = resultChecker.CheckResult(cell.row, col, currentPlayer.PlayerId);
+        Result result = resultChecker.CheckResult(cell.row, col, currentPlayer.PlayerId);
 
-        if (result == Result.Win)
+        if (result != Result.Ongoing)
         {
-            Debug.Log($"Player {currentPlayer.PlayerId} Wins!");
-            OnWin?.Invoke(currentPlayer.PlayerId);
-            return;
-        }
+            if (result == Result.Win)
+            {
+                var sfx = currentPlayer.IsHuman ? UISFX.Win : UISFX.Lose;
+                AudioManager.Instance?.PlaySFX(sfx);
 
-        if (board.IsFull())
-        {
-            Debug.Log("It's a Draw!");
-            OnDraw?.Invoke();
-            return;
+                List<Vector2Int> winCells = resultChecker.WinningCells;
+                board.GlowWinningCells(winCells);
+
+                StartCoroutine(ResultDelay(currentPlayer, result));
+            }
+            else
+            {
+                OnGameOver?.Invoke(null, result);
+            }
         }
 
         ChangeTurn();
+    }
+    private IEnumerator ResultDelay(IPlayerController winner, Result result)
+    {
+        yield return new WaitForSeconds(1.5f);
+
+        OnGameOver?.Invoke(winner, result);
     }
 
     private void ChangeTurn()
     {
         currentPlayer = (currentPlayer == player1) ? player2 : player1;
+        ChangeTurnText();
+
         Debug.Log($"Switched to Player {currentPlayer.PlayerId}");
         currentPlayer.PlayTurn();
+    }
+
+    public void ChangeTurnText()
+    {
+        if (turnText == null)
+        {
+            Debug.LogWarning("Turn text is not assigned.");
+            return;
+        }
+
+        turnText.text = currentPlayer.IsHuman
+            ? $"Player {currentPlayer.PlayerId}'s Turn"
+            : $"AI is Thinking...";
+    }
+
+    public void RestartGame()
+    {
+        board.GenerateBoard(rows, cols);
+        resultChecker = new GameResult(board.CellStateGrid);
+        StartGame();
     }
 }

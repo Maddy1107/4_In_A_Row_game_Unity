@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameResult
@@ -5,6 +6,9 @@ public class GameResult
     private readonly int[,] grid;
     private readonly int rows;
     private readonly int cols;
+
+    private List<Vector2Int> winningCells = new List<Vector2Int>();
+    public List<Vector2Int> WinningCells => winningCells;
 
     private static readonly Vector2Int[] directions = new[]
     {
@@ -23,8 +27,13 @@ public class GameResult
 
     public Result CheckResult(int row, int col, int playerId)
     {
+        winningCells.Clear();
+
         if (CheckWin(row, col, playerId))
             return Result.Win;
+
+        if (IsFull())
+            return Result.Draw;
 
         return Result.Ongoing;
     }
@@ -33,35 +42,52 @@ public class GameResult
     {
         foreach (var dir in directions)
         {
-            int count = 1;
-            count += CountDirection(row, col, dir.x, dir.y, playerId);
-            count += CountDirection(row, col, -dir.x, -dir.y, playerId);
+            List<Vector2Int> current = new List<Vector2Int> { new Vector2Int(row, col) };
 
-            if (count >= 4)
+            current.AddRange(CollectDirection(row, col, dir.x, dir.y, playerId));
+            current.AddRange(CollectDirection(row, col, -dir.x, -dir.y, playerId));
+
+            if (current.Count >= 4)
+            {
+                winningCells = current;
                 return true;
+            }
         }
 
         return false;
     }
 
-    private int CountDirection(int row, int col, int rowDir, int colDir, int playerId)
+    private List<Vector2Int> CollectDirection(int row, int col, int rowDir, int colDir, int playerId)
     {
-        int count = 0;
+        List<Vector2Int> result = new List<Vector2Int>();
         int r = row + rowDir;
         int c = col + colDir;
 
         while (IsValid(r, c) && grid[r, c] == playerId)
         {
-            count++;
+            result.Add(new Vector2Int(r, c));
             r += rowDir;
             c += colDir;
         }
 
-        return count;
+        return result;
     }
 
     private bool IsValid(int row, int col)
     {
         return row >= 0 && row < rows && col >= 0 && col < cols;
+    }
+
+    public bool IsFull()
+    {
+        if (grid == null || cols == 0 || rows == 0)
+            return false;
+
+        for (int col = 0; col < cols; col++)
+        {
+            if (grid[0, col] == 0)
+                return false;
+        }
+        return true;
     }
 }

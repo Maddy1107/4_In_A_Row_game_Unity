@@ -21,7 +21,6 @@ public class UIManager : MonoBehaviour
     void OnEnable()
     {
         ShowUI(UIState.Game);
-
     }
 
     public void ShowUI(UIState state)
@@ -30,4 +29,5 @@ public class UIManager : MonoBehaviour
         gameUI.SetActive(state == UIState.Game);
         settingsMenu.SetActive(state == UIState.SettingsMenu);
     }
+
 }

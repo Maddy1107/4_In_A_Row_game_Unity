@@ -9,8 +9,8 @@ public class MainMenu : MonoBehaviour
 
     void OnEnable()
     {
-        localGameButton.onClick.AddListener(() => StartGame(PlayerType.Human, PlayerType.Human));
-        aiGameButton.onClick.AddListener(() => StartGame(PlayerType.Human, PlayerType.AI));
+        localGameButton.onClick.AddListener(() => StartGame(GameMode.Local));
+        aiGameButton.onClick.AddListener(() => StartGame(GameMode.AI));
         settingsButton.onClick.AddListener(OpenSettings);
     }
 
@@ -21,10 +21,10 @@ public class MainMenu : MonoBehaviour
         settingsButton.onClick.RemoveAllListeners();
     }
 
-    private void StartGame(PlayerType p1, PlayerType p2)
+    private void StartGame(GameMode mode)
     {
-        GameManager.Instance.CreatePlayer(p1, p2);
         UIManager.Instance.ShowUI(UIState.Game);
+        GameManager.Instance.SelectMode(mode);
     }
 
     private void OpenSettings()

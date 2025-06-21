@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,6 +9,13 @@ public class AIController : IPlayerController
 
     public void PlayTurn()
     {
+        GameManager.Instance.StartCoroutine(DelayedAIMove());
+    }
+
+    private IEnumerator DelayedAIMove()
+    {
+        yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
+
         var board = GameManager.Instance.board.CellStateGrid;
         int cols = board.GetLength(1);
         List<int> availableCols = new List<int>();
@@ -24,4 +32,5 @@ public class AIController : IPlayerController
             GameManager.Instance.TryMakeMove(col);
         }
     }
+
 }

@@ -4,152 +4,106 @@ using UnityEngine.UI;
 
 public class SettingsMenu : MonoBehaviour
 {
-    [Header("Volume")]
+    [Header("Audio")]
     public Slider volumeSlider;
     public Toggle volumeToggle;
-
-    [Header("Navigation")]
-    public Button backButton;
-
-    [Header("Icons")]
     public Sprite volumeOnIcon;
     public Sprite volumeOffIcon;
 
-    [Header("Radio Options")]
+    [Header("UI Navigation")]
+    public Button backButton;
+
+    [Header("Toggles")]
     public List<RadioOption> options;
 
-    private float volume = 1f;
-    private bool musicEnabled = true;
-    private bool sfxEnabled = true;
-    private Difficulty difficulty = Difficulty.Easy;
+    private AudioSettings audioSettings = new AudioSettings();
 
-    #region Unity Methods
-
-    void OnEnable()
+    private void OnEnable()
     {
-        LoadSettings();
-        SetupUIListeners();
-        ApplySettingsToUI();
+        audioSettings.Load();
+
+        SetupListeners();
+        ApplySavedSettingsToUI();
+        UpdateIcons();
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        SaveSettings();
         CleanupListeners();
+        audioSettings.Save();
     }
 
-    #endregion
-
-    #region Setup
-
-    void SetupUIListeners()
+    private void SetupListeners()
     {
         volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
         volumeToggle.onValueChanged.AddListener(ToggleMute);
         backButton.onClick.AddListener(() => UIManager.Instance.ShowUI(UIState.MainMenu));
 
         foreach (var option in options)
-        {
             option.Initialize(OnOptionSelected);
-        }
     }
 
-    void CleanupListeners()
+    private void CleanupListeners()
     {
         volumeSlider.onValueChanged.RemoveAllListeners();
         volumeToggle.onValueChanged.RemoveAllListeners();
         backButton.onClick.RemoveAllListeners();
+
+        foreach (var option in options)
+            option.Initialize(OnOptionSelected);
     }
 
-    #endregion
-
-    #region Settings State
-
-    void LoadSettings()
+    private void ApplySavedSettingsToUI()
     {
-        volume = PlayerPrefs.GetFloat("Volume", 1f);
-        musicEnabled = PlayerPrefs.GetInt("MusicEnabled", 1) == 1;
-        sfxEnabled = PlayerPrefs.GetInt("SFXEnabled", 1) == 1;
+        volumeSlider.value = audioSettings.CurrentVolume;
+        volumeToggle.isOn = !audioSettings.MusicEnabled;
 
         string savedDiff = PlayerPrefs.GetString("GameDifficulty", "Easy");
-        if (!System.Enum.TryParse(savedDiff, out difficulty))
-        {
-            difficulty = Difficulty.Easy;
-        }
-    }
-
-    void SaveSettings()
-    {
-        PlayerPrefs.SetFloat("Volume", volume);
-        PlayerPrefs.SetInt("MusicEnabled", musicEnabled ? 1 : 0);
-        PlayerPrefs.SetInt("SFXEnabled", sfxEnabled ? 1 : 0);
-        PlayerPrefs.SetString("GameDifficulty", difficulty.ToString());
-        PlayerPrefs.Save();
-    }
-
-    #endregion
-
-    #region UI → State Handlers
-
-    void OnVolumeChanged(float value)
-    {
-        volume = value;
-        musicEnabled = value > 0.01f;
-        AudioListener.volume = musicEnabled ? volume : 0f;
-        UpdateVolumeIcon();
-    }
-
-    void ToggleMute(bool isMuted)
-    {
-        musicEnabled = !isMuted;
-        volume = musicEnabled ? 1f : 0f;
-        volumeSlider.value = volume;
-        AudioListener.volume = volume;
-        UpdateVolumeIcon();
-    }
-
-    void OnOptionSelected(RadioOption selected)
-    {
-        switch (selected.type)
-        {
-            case RadioOptionType.Difficulty:
-                difficulty = selected.difficultyValue;
-                Debug.Log("Difficulty set to: " + difficulty);
-                break;
-
-            case RadioOptionType.SFX:
-                sfxEnabled = selected.sfxEnabled;
-                Debug.Log("SFX enabled: " + sfxEnabled);
-                break;
-        }
-    }
-
-    #endregion
-
-    #region UI Update
-
-    void ApplySettingsToUI()
-    {
-        volumeSlider.value = volume;
-        volumeToggle.isOn = !musicEnabled;
+        bool sfxOn = PlayerPrefs.GetInt("SFXEnabled", 1) == 1;
 
         foreach (var option in options)
         {
-            if (option.type == RadioOptionType.Difficulty && option.difficultyValue == difficulty)
-                option.toggle.isOn = true;
-
-            else if (option.type == RadioOptionType.SFX && option.sfxEnabled == sfxEnabled)
-                option.toggle.isOn = true;
+            if (option.type == RadioOptionType.Difficulty)
+            {
+                option.toggle.isOn = option.difficultyValue.ToString() == savedDiff;
+            }
+            else if (option.type == RadioOptionType.SFX)
+            {
+                option.toggle.isOn = option.sfxEnabled == sfxOn;
+            }
         }
 
-        UpdateVolumeIcon();
     }
 
-    void UpdateVolumeIcon()
+    private void OnVolumeChanged(float value)
     {
-        if (volumeToggle != null)
-            volumeToggle.GetComponent<Image>().sprite = musicEnabled ? volumeOnIcon : volumeOffIcon;
+        audioSettings.SetVolume(value);
+        UpdateIcons();
     }
 
-    #endregion
+    private void ToggleMute(bool isOn)
+    {
+        audioSettings.ToggleMute(isOn);
+        volumeSlider.value = audioSettings.CurrentVolume;
+        UpdateIcons();
+    }
+
+    private void OnOptionSelected(RadioOption selected)
+    {
+        if (selected.type == RadioOptionType.Difficulty)
+        {
+            PlayerPrefs.SetString("GameDifficulty", selected.difficultyValue.ToString());
+            Debug.Log("Difficulty set to: " + selected.difficultyValue);
+        }
+        else if (selected.type == RadioOptionType.SFX)
+        {
+            audioSettings.ToggleSFX(selected.sfxEnabled);
+            Debug.Log("SFX enabled: " + selected.sfxEnabled);
+        }
+    }
+
+    private void UpdateIcons()
+    {
+        volumeToggle.GetComponent<Image>().sprite = audioSettings.MusicEnabled ? volumeOnIcon : volumeOffIcon;
+    }
 }

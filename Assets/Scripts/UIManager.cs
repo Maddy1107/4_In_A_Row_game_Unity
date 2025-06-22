@@ -20,7 +20,7 @@ public class UIManager : MonoBehaviour
 
     void OnEnable()
     {
-        ShowUI(UIState.Game);
+        ShowUI(UIState.MainMenu);
     }
 
     public void ShowUI(UIState state)

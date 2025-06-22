@@ -1,11 +1,17 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AIController : IPlayerController
 {
     public int PlayerId { get; set; }
     public bool IsHuman => false;
+
+    private readonly AIMoveSelector moveSelector;
+
+    public AIController(Difficulty difficulty)
+    {
+        moveSelector = new AIMoveSelector(difficulty);
+    }
 
     public void PlayTurn()
     {
@@ -15,22 +21,7 @@ public class AIController : IPlayerController
     private IEnumerator DelayedAIMove()
     {
         yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
-
-        var board = GameManager.Instance.board.CellStateGrid;
-        int cols = board.GetLength(1);
-        List<int> availableCols = new List<int>();
-
-        for (int i = 0; i < cols; i++)
-        {
-            if (board[0, i] == 0)
-                availableCols.Add(i);
-        }
-
-        if (availableCols.Count > 0)
-        {
-            int col = availableCols[Random.Range(0, availableCols.Count)];
-            GameManager.Instance.TryMakeMove(col);
-        }
+        int col = moveSelector.SelectColumn(GameManager.Instance.board.CellStateGrid, PlayerId);
+        GameManager.Instance.TryMakeMove(col);
     }
-
 }

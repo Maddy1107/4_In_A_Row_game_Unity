@@ -7,10 +7,15 @@ public class WinPopup : MonoBehaviour
 {
     private PopupAnimator animator;
     [SerializeField] private TMP_Text winText;
+    [SerializeField] private Image resutlImage;
 
     [Header("Buttons")]
     [SerializeField] private Button restartButton;
     [SerializeField] private Button mainMenuButton;
+
+    [Header("Sprites")]
+    [SerializeField] private Sprite winSprite;
+    [SerializeField] private Sprite drawSprite;
 
     void OnEnable()
     {
@@ -49,10 +54,12 @@ public class WinPopup : MonoBehaviour
         {
             AudioManager.Instance?.PlaySFX(UISFX.Lose);
             winText.text = "It's a Draw!";
+            resutlImage.sprite = drawSprite;
         }
         else
         {
             winText.text = player.IsHuman ? $"Player {player.PlayerId}\nWins!" : "AI\nWins!";
+            resutlImage.sprite = winSprite;
         }
         animator.AnimateIn();
     }

@@ -80,6 +80,7 @@ public class AudioManager : MonoBehaviour
 
     public void SetSFXEnabled(bool isOn)
     {
+        sfxSource.mute = isOn;
         PlayerPrefs.SetInt(SFXEnabledKey, isOn ? 1 : 0);
     }
 

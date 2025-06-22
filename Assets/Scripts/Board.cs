@@ -88,14 +88,4 @@ public class Board : MonoBehaviour
         cells[row, col].SetPiece(playerId);
         AudioManager.Instance?.PlaySFX(UISFX.Piecefall);
     }
-
-    public int GetCellState(int row, int col)
-    {
-        if (row < 0 || row >= rows || col < 0 || col >= cols)
-        {
-            Debug.LogError($"Invalid cell coordinates: ({row}, {col})");
-            return -1;
-        }
-        return CellStateGrid[row, col];
-    }
 }

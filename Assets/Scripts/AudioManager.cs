@@ -80,7 +80,6 @@ public class AudioManager : MonoBehaviour
 
     public void SetSFXEnabled(bool isOn)
     {
-        sfxSource.mute = isOn;
         PlayerPrefs.SetInt(SFXEnabledKey, isOn ? 1 : 0);
     }
 
@@ -94,10 +93,8 @@ public class AudioManager : MonoBehaviour
     {
         float volume = GetMusicVolume();
         bool musicEnabled = IsMusicEnabled();
-        bool sfxEnabled = IsSFXEnabled();
 
         musicSource.volume = volume;
         musicSource.mute = !musicEnabled || volume <= 0.01f;
-        sfxSource.mute = !sfxEnabled;
     }
 }

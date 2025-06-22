@@ -100,7 +100,7 @@ public class Cell : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             yield return null;
         }
 
-        // 🔁 Bounce
+        // Bounce
         float bounceHeight = 25f;
         float bounceDuration = 0.3f;
         Vector2 peak = end + Vector2.up * bounceHeight;

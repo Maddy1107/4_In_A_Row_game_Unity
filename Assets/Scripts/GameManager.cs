@@ -2,7 +2,6 @@ using UnityEngine;
 using System;
 using TMPro;
 using System.Collections.Generic;
-using System.Linq;
 using System.Collections;
 
 public class GameManager : MonoBehaviour
@@ -27,6 +26,7 @@ public class GameManager : MonoBehaviour
 
     // Game Events
     public event Action<IPlayerController, Result> OnGameOver;
+    public event Action OnBack;
 
     void Awake()
     {
@@ -36,10 +36,6 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
-    }
-    void Start()
-    {
-        CreatePlayer(PlayerType.Human, PlayerType.Human);
     }
 
     private void StartGame()
@@ -113,23 +109,23 @@ public class GameManager : MonoBehaviour
 
         if (result != Result.Ongoing)
         {
-            if (result == Result.Win)
-            {
-                var sfx = currentPlayer.IsHuman ? UISFX.Win : UISFX.Lose;
-                AudioManager.Instance?.PlaySFX(sfx);
-
-                List<Vector2Int> winCells = resultChecker.WinningCells;
-                board.GlowWinningCells(winCells);
-
-                StartCoroutine(ResultDelay(currentPlayer, result));
-            }
-            else
+            if (result == Result.Draw)
             {
                 OnGameOver?.Invoke(null, result);
             }
-        }
 
-        ChangeTurn();
+            var sfx = currentPlayer.IsHuman ? UISFX.Win : UISFX.Lose;
+            AudioManager.Instance?.PlaySFX(sfx);
+
+            List<Vector2Int> winCells = resultChecker.WinningCells;
+            board.GlowWinningCells(winCells);
+
+            StartCoroutine(ResultDelay(currentPlayer, result));
+        }
+        else
+        {
+            ChangeTurn();
+        }
     }
     private IEnumerator ResultDelay(IPlayerController winner, Result result)
     {
@@ -165,5 +161,10 @@ public class GameManager : MonoBehaviour
         board.GenerateBoard(rows, cols);
         resultChecker = new GameResult(board.CellStateGrid);
         StartGame();
+    }
+
+    public void OnBackPressed()
+    {
+        OnBack?.Invoke();
     }
 }

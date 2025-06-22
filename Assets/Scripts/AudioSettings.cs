@@ -48,7 +48,7 @@ public class AudioSettings
         }
         else
         {
-            CurrentVolume = LastVolumeBeforeMute;
+            CurrentVolume = LastVolumeBeforeMute > 0.001f ? LastVolumeBeforeMute : 1f;
         }
         ApplyVolume();
     }

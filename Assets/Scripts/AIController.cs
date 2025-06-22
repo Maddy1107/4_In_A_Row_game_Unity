@@ -11,6 +11,7 @@ public class AIController : IPlayerController
     public AIController(Difficulty difficulty)
     {
         moveSelector = new AIMoveSelector(difficulty);
+        Debug.Log($"AI initialized with difficulty: {difficulty}");
     }
 
     public void PlayTurn()

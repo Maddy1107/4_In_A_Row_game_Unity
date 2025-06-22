@@ -400,7 +400,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2507985994617002729, guid: 55216d1f2871c0b42af53c2c4c76816f, type: 3}
       propertyPath: m_Name
-      value: Confetti_Particles_Sphere
+      value: ConfettiParticles
       objectReference: {fileID: 0}
     - target: {fileID: 2507985994617002732, guid: 55216d1f2871c0b42af53c2c4c76816f, type: 3}
       propertyPath: m_RootOrder
@@ -408,11 +408,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2507985994617002732, guid: 55216d1f2871c0b42af53c2c4c76816f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.5100007
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2507985994617002732, guid: 55216d1f2871c0b42af53c2c4c76816f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.0319549
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2507985994617002732, guid: 55216d1f2871c0b42af53c2c4c76816f, type: 3}
       propertyPath: m_LocalPosition.z

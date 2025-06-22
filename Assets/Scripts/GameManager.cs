@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
 
     public TMP_Text turnText;
 
+    public ParticleSystem Particles;
+
     // Game Events
     public event Action<IPlayerController, Result> OnGameOver;
     public event Action OnBack;
@@ -105,7 +107,13 @@ public class GameManager : MonoBehaviour
 
         board.PlacePiece(cell.row, col, currentPlayer.PlayerId);
 
-        Result result = resultChecker.CheckResult(cell.row, col, currentPlayer.PlayerId);
+        if (!HasGameEnded(cell.row, col))
+            ChangeTurn();
+    }
+
+    public bool HasGameEnded(int row, int col)
+    {
+        Result result = resultChecker.CheckResult(row, col, currentPlayer.PlayerId);
 
         if (result != Result.Ongoing)
         {
@@ -114,6 +122,9 @@ public class GameManager : MonoBehaviour
                 OnGameOver?.Invoke(null, result);
             }
 
+            if (currentPlayer.IsHuman)
+                PlayParticles();
+
             var sfx = currentPlayer.IsHuman ? UISFX.Win : UISFX.Lose;
             AudioManager.Instance?.PlaySFX(sfx);
 
@@ -121,17 +132,25 @@ public class GameManager : MonoBehaviour
             board.GlowWinningCells(winCells);
 
             StartCoroutine(ResultDelay(currentPlayer, result));
+
+            return true;
         }
-        else
-        {
-            ChangeTurn();
-        }
+        return false;
     }
+
     private IEnumerator ResultDelay(IPlayerController winner, Result result)
     {
         yield return new WaitForSeconds(1.5f);
 
         OnGameOver?.Invoke(winner, result);
+    }
+
+    private void PlayParticles()
+    {
+        if (Particles != null)
+        {
+            Particles.Play();
+        }
     }
 
     private void ChangeTurn()

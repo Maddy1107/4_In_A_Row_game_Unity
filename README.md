@@ -108,6 +108,6 @@ A polished, feature-rich Connect 4 game built in Unity with animations, audio, a
 ## 👤 Credits
 
 - **Developer:** Nilankar Deb  
-- **Tools:** Unity, C#, Photoshop (UI assets)
+- **Tools:** Unity, C#
 
 ---
